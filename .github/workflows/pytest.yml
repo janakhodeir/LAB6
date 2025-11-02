@@ -8,6 +8,18 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
+    - name: Debug - Show repository structure
+      run: |
+        echo "=== Full directory structure ==="
+        find . -type f -name "*.py" | sort
+        echo "=== scripts/ folder contents ==="
+        ls -la scripts/
+        echo "=== File contents ==="
+        cat scripts/math_utils.py
+        cat scripts/test_math_utils.py
+        echo "=== Python path ==="
+        python -c "import sys; print('\n'.join(sys.path))"
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -18,7 +30,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
 
-    - name: Run pytest
+    - name: Debug - Try manual test discovery
       run: |
-        python -c "import os; print(os.listdir('scripts'))"
-        pytest -v scripts/
+        echo "=== Manual test discovery ==="
+        python -c "
+        import sys
+        sys.path.append('scripts')
+        from test_math_utils import test_add, test_subtract
+        test_add()
+        test_subtract()
+        print('Manual tests passed!')
+        "
+
+    - name: Run pytest with detailed output
+      run: |
+        pytest -v scripts/ --tb=short 
